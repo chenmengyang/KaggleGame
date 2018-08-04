@@ -42,7 +42,7 @@ def readTrain(word_to_index):
     return trainingSet, trainingLabels
 
 # read the test data, return sentences words indexes
-def readTest():
+def readTest(word_to_index):
     testSet = []
     #with open('./data/test.tsv') as f:
     f_tsv = test
@@ -94,21 +94,20 @@ def applyPadding(maxlen, index, dataset):
             arr = np.pad(arr, (0, maxlen-len(arr)), 'constant')
         newSet.append(arr)
     return newSet
-
-# lets load the word embedding matrix first
-word_to_index, index_to_word, word_to_vec_map = read_glove_vecs('./data/glove.6B.50d.txt')
-# load training set, of course we will convert words into embeddings
-train, _ = readTrain(word_to_index)
-# well, do the same thing the test data
-test = readTest()
-# print ('length of training set is {}'.format(len(train)))
-# print ('the first training sample length is {}'.format(len(train[0])))
-# now find the maximun length of the training set and the test set
-maxlen = getMaxLen(train, test)
-# print ('maximun sentence length is {}'.format(maxlen))
-# apply zero padding values to train and test set
-# great man! we are done, this is the thing we will feed to the neural network, boom!
-train = applyPadding(maxlen, 0, train)
-test = applyPadding(maxlen, 0, test)
-print ('preview your training set, the frist train data had been converted into {}'.format(train[0]))
-print(len(train))
+def load_data():
+    # lets load the word embedding matrix first
+    word_to_index, index_to_word, word_to_vec_map = read_glove_vecs('./data/glove.6B.50d.txt')
+    # load train and test data into word indexes first
+    trainX, trainY = readTrain(word_to_index)
+    test = readTest(word_to_index)
+    # print ('length of training set is {}'.format(len(train)))
+    # print ('the first training sample length is {}'.format(len(train[0])))
+    # now find the longest sentence length of the training set and the test set
+    maxlen = getMaxLen(trainX, test)
+    # print ('maximun sentence length is {}'.format(maxlen))
+    # apply zero padding values to train and test set
+    # great man! we are done, this is the thing we will feed to the neural network, boom!
+    trainX = applyPadding(maxlen, 0, trainX)
+    test = applyPadding(maxlen, 0, test)
+    # print ('preview your training set, the frist train data had been converted into {}'.format(train[0]))
+    return trainX, trainY, test, word_to_vec_map
