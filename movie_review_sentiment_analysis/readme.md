@@ -5,7 +5,7 @@
 * apply padding to all train + test dataset, so all the sentences will have the same length (because input layer can only accept same fixed input size)
 
 
-2. find pretrain word-embedding online source (optional but strongly recomment)
+2. find pretrain word-embedding (please read [here](https://www.tensorflow.org/tutorials/representation/word2vec) to understand why we need word-embedding)
 * good word-embedding can present the meaning of words
 * word-embedding will convert charater words into integers with meanings
 
