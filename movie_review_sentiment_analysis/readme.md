@@ -12,3 +12,10 @@
 3. design neural network architect
 * better test with LSTM, RNN, GRU
 * implement with Keras or tensorflow
+
+
+# Notes
+
+1. There are some errors with the data (both train and test), I think its because the embedding matrix (which has learned 400000 words) didn't learn some of the words, should check carefully, e.g. a word like 'pre-train' is hard to deal with, but we can absoluty convert it into 2 words 'pre' and 'train'.
+* there are 13548 rows of error sentences in train data
+* there are 5361 rows of error sentences in test set
