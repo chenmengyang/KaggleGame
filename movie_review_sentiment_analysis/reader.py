@@ -17,11 +17,11 @@ def readTrain(word_to_index):
             except:
                 errors += 1
                 # print(row['Phrase'])
-        # print ('there are {} number of error texts'.format(errors))
+        print ('there are {} rows of error sentences in train data'.format(errors))
     return trainingSet, trainingLabels
 
 # read the test data, return sentences words indexes
-def readTest():
+def readTest(word_to_index):
     testSet = []
     with open('./data/test.tsv') as f:
         f_tsv = csv.DictReader(f, delimiter='\t')
@@ -33,7 +33,7 @@ def readTest():
             except:
                 errors += 1
                 # print(row['Phrase'])
-        print ('there are {} number of error sentences in test set'.format(errors))
+        print ('there are {} rows of error sentences in test set'.format(errors))
     return testSet
 
 # read the pretrained word-embedding matrix
@@ -57,9 +57,9 @@ def read_glove_vecs(glove_file):
     return words_to_index, index_to_words, word_to_vec_map
 
 # get the maximun length of list of train and test sentences
-def getMaxLen(trainData, setData):
+def getMaxLen(trainData, testData):
     max1 = max([len(x) for x in trainData])
-    max2 = max([len(x) for x in setData])
+    max2 = max([len(x) for x in testData])
     return max1 if max1>=max2 else max2
 
 # 
@@ -71,19 +71,21 @@ def applyPadding(maxlen, index, dataset):
         newSet.append(arr)
     return newSet
 
-# lets load the word embedding matrix first
-word_to_index, index_to_word, word_to_vec_map = read_glove_vecs('./data/glove.6B.50d.txt')
-# load training set, of course we will convert words into embeddings
-train, _ = readTrain(word_to_index)
-# well, do the same thing the test data
-test = readTest()
-# print ('length of training set is {}'.format(len(train)))
-# print ('the first training sample length is {}'.format(len(train[0])))
-# now find the maximun length of the training set and the test set
-maxlen = getMaxLen(train, test)
-# print ('maximun sentence length is {}'.format(maxlen))
-# apply zero padding values to train and test set
-# great man! we are done, this is the thing we will feed to the neural network, boom!
-train = applyPadding(maxlen, 0, train)
-test = applyPadding(maxlen, 0, test)
-print ('preview your training set, the frist train data had been converted into {}'.format(train[0]))
+# this function should export all the necessary things needed by model
+def load_data():
+    # lets load the word embedding matrix first
+    word_to_index, index_to_word, word_to_vec_map = read_glove_vecs('./data/glove.6B.50d.txt')
+    # load train and test data into word indexes first
+    trainX, trainY = readTrain(word_to_index)
+    test = readTest(word_to_index)
+    # print ('length of training set is {}'.format(len(train)))
+    # print ('the first training sample length is {}'.format(len(train[0])))
+    # now find the longest sentence length of the training set and the test set
+    maxlen = getMaxLen(trainX, test)
+    # print ('maximun sentence length is {}'.format(maxlen))
+    # apply zero padding values to train and test set
+    # great man! we are done, this is the thing we will feed to the neural network, boom!
+    trainX = applyPadding(maxlen, 0, trainX)
+    test = applyPadding(maxlen, 0, test)
+    # print ('preview your training set, the frist train data had been converted into {}'.format(train[0]))
+    return trainX, trainY, test, word_to_vec_map
