@@ -27,18 +27,23 @@ def readTrain(word_to_index):
     trainingSet = []
     trainingLabels = []
     errors = 0
-    for row in train['Phrase'].values:
+    for word in T.text_to_word_sequence(train['Phrase'].get(0),
+                                            filters='!"#$%&()*+,-./:;<=>?@[\]^_`{|}~\t\n',
+                                            lower=True,
+                                            split=" "):
+    	print(word_to_index[word])
+    for i,row in enumerate(train['Phrase'].values):
         try:
             indexes = [word_to_index[word] for word in T.text_to_word_sequence(row,
                                                filters='!"#$%&()*+,-./:;<=>?@[\]^_`{|}~\t\n',
                                                lower=True,
                                                split=" ")]
             trainingSet.append(np.array(indexes))
-            trainingLabels.append(row['Sentiment'])
+            trainingLabels.append(train['Sentiment'].get(i))
         except  Exception as e:
             errors += 1
-            #print(e)
-    #print ('there are {} number of error texts'.format(errors))
+            print(e)
+    print ('there are {} number of error texts'.format(errors))
     return trainingSet, trainingLabels
 
 # read the test data, return sentences words indexes
@@ -57,7 +62,7 @@ def readTest(word_to_index):
             testSet.append(np.array(indexes))
         except:
             errors += 1
-    #print ('there are {} number of error sentences in test set'.format(errors))
+    print ('there are {} number of error sentences in test set'.format(errors))
     return testSet
 
 # read the pretrained word-embedding matrix
