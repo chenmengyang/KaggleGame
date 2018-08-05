@@ -65,7 +65,7 @@ def readTrain(word_to_index):
             trainingLabels.append(int(train['Sentiment'].get(i)))
         except  Exception as e:
             errors += 1
-            trainErrors.writerow(row)
+            # trainErrors.writerow(row)
             # print(e)
     print ('there are {} number of error texts'.format(errors))
     return trainingSet, convert_to_one_hot(np.asarray(trainingLabels, dtype=int), 5)
@@ -86,7 +86,7 @@ def readTest(word_to_index):
             testSet.append(indexes)
         except:
             errors += 1
-            testErrors.writerow(row)
+            # testErrors.writerow(row)
     print ('there are {} number of error sentences in test set'.format(errors))
     return testSet
 
