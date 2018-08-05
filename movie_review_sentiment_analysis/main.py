@@ -1,11 +1,15 @@
 import pandas as pd 
 train = pd.read_csv('./data/train.tsv', sep='\t')
 test = pd.read_csv('./data/test.tsv', sep='\t')
-
+import csv
 import numpy as np
-
 from keras.preprocessing.text import Tokenizer
 import keras.preprocessing.text as T
+
+# give C =5 , convert Y=1 into [0,1,0,0,0]
+def convert_to_one_hot(Y, C):
+    Y = np.eye(C)[Y.reshape(-1)]
+    return Y
 
 # read the train data, return sentences words indexes, and lables
 def readTrain(word_to_index):
@@ -27,24 +31,35 @@ def readTrain(word_to_index):
     trainingSet = []
     trainingLabels = []
     errors = 0
-    for word in T.text_to_word_sequence(train['Phrase'].get(0),
-                                            filters='!"#$%&()*+,-./:;<=>?@[\]^_`{|}~\t\n',
-                                            lower=True,
-                                            split=" "):
-    	print(word_to_index[word])
-    for i,row in enumerate(train['Phrase'].values):
+    # for word in T.text_to_word_sequence(train['Phrase'].get(0),
+    #                                         filters='!"#$%&()*+,-./:;<=>?@[\]^_`{|}~\t\n',
+    #                                         lower=True,
+    #                                         split=" "):
+    # 	print(word_to_index[word])
+    for i,row in enumerate(zip(train['PhraseId'].values, train['Phrase'].values)):
         try:
-            indexes = [word_to_index[word] for word in T.text_to_word_sequence(row,
+            # debugging
+            # if (i == 10):
+            #     # print ('fuck')
+            #     print (row)
+            #     print (T.text_to_word_sequence(row,
+            #                                    filters='!"#$%&()*+,-./:;<=>?@[\]^_`{|}~\t\n',
+            #                                    lower=True,
+            #                                    split=" "))
+            #     break
+            # 
+            indexes = [word_to_index[word] for word in T.text_to_word_sequence(row[1],
                                                filters='!"#$%&()*+,-./:;<=>?@[\]^_`{|}~\t\n',
                                                lower=True,
                                                split=" ")]
-            trainingSet.append(np.array(indexes))
-            trainingLabels.append(train['Sentiment'].get(i))
+            trainingSet.append(indexes)
+            trainingLabels.append(int(train['Sentiment'].get(i)))
         except  Exception as e:
             errors += 1
-            print(e)
+            # trainErrors.writerow(row)
+            # print(e)
     print ('there are {} number of error texts'.format(errors))
-    return trainingSet, trainingLabels
+    return trainingSet, convert_to_one_hot(np.asarray(trainingLabels, dtype=int), 5)
 
 # read the test data, return sentences words indexes
 def readTest(word_to_index):
@@ -52,16 +67,17 @@ def readTest(word_to_index):
     #with open('./data/test.tsv') as f:
     f_tsv = test
     errors = 0
-    for row in test['Phrase'].values:
+    for row in zip(test['PhraseId'].values, test['Phrase'].values):
         try:
-            indexes = [word_to_index[word] for word in T.text_to_word_sequence(row,
+            indexes = [word_to_index[word] for word in T.text_to_word_sequence(row[1],
                                                filters='!"#$%&()*+,-./:;<=>?@[\]^_`{|}~\t\n',
                                                lower=True,
                                                split=" ")]
             #print(indexes)
-            testSet.append(np.array(indexes))
+            testSet.append(indexes)
         except:
             errors += 1
+            # testErrors.writerow(row)
     print ('there are {} number of error sentences in test set'.format(errors))
     return testSet
 
@@ -91,17 +107,18 @@ def getMaxLen(trainData, setData):
     max2 = max([len(x) for x in setData])
     return max1 if max1>=max2 else max2
 
-# 
+# apply 0 indexes to sentences, for making all sentences have the same length
 def applyPadding(maxlen, index, dataset):
     newSet = []
     for arr in dataset:
         if len(arr) < maxlen:
             arr = np.pad(arr, (0, maxlen-len(arr)), 'constant')
         newSet.append(arr)
-    return newSet
+    return np.asarray(newSet)
+
 def load_data():
     # lets load the word embedding matrix first
-    word_to_index, index_to_word, word_to_vec_map = read_glove_vecs('./data/glove.6B.50d.txt')
+    word_to_index, _, word_to_vec_map = read_glove_vecs('./data/glove.6B.50d.txt')
     # load train and test data into word indexes first
     trainX, trainY = readTrain(word_to_index)
     test = readTest(word_to_index)
@@ -115,4 +132,17 @@ def load_data():
     trainX = applyPadding(maxlen, 0, trainX)
     test = applyPadding(maxlen, 0, test)
     # print ('preview your training set, the frist train data had been converted into {}'.format(train[0]))
-    return trainX, trainY, test, word_to_vec_map
+    return trainX, trainY, test, (word_to_index, word_to_vec_map), maxlen
+
+
+# word_to_index, index_to_word, word_to_vec_map = read_glove_vecs('./data/glove.6B.50d.txt')
+# # load train and test data into word indexes first
+# f1 = open('./data/trainError.csv', 'w')
+# trainErrors = csv.writer(f1)
+# trainX, trainY = readTrain(word_to_index)
+# f1.close()
+
+# f2 = open('./data/testError.csv', 'w')
+# testErrors = csv.writer(f2)
+# test = readTest(word_to_index)
+# f2.close()
