@@ -3,6 +3,7 @@ train = pd.read_csv('./data/train.tsv', sep='\t')
 test = pd.read_csv('./data/test.tsv', sep='\t')
 import csv
 import numpy as np
+import re
 from keras.preprocessing.text import Tokenizer
 import keras.preprocessing.text as T
 
@@ -10,6 +11,14 @@ import keras.preprocessing.text as T
 def convert_to_one_hot(Y, C):
     Y = np.eye(C)[Y.reshape(-1)]
     return Y
+
+def getIndex(word, word_to_index):
+    idx = 0
+    try:
+        idx = word_to_index[word]
+    except:
+        idx = 0
+    return idx
 
 # read the train data, return sentences words indexes, and lables
 def readTrain(word_to_index):
@@ -48,7 +57,7 @@ def readTrain(word_to_index):
             #                                    split=" "))
             #     break
             # 
-            indexes = [word_to_index[word] for word in T.text_to_word_sequence(row[1],
+            indexes = [getIndex(word, word_to_index) for word in T.text_to_word_sequence(row[1],
                                                filters='!"#$%&()*+,-./:;<=>?@[\]^_`{|}~\t\n',
                                                lower=True,
                                                split=" ")]
@@ -56,7 +65,7 @@ def readTrain(word_to_index):
             trainingLabels.append(int(train['Sentiment'].get(i)))
         except  Exception as e:
             errors += 1
-            # trainErrors.writerow(row)
+            trainErrors.writerow(row)
             # print(e)
     print ('there are {} number of error texts'.format(errors))
     return trainingSet, convert_to_one_hot(np.asarray(trainingLabels, dtype=int), 5)
@@ -69,7 +78,7 @@ def readTest(word_to_index):
     errors = 0
     for row in zip(test['PhraseId'].values, test['Phrase'].values):
         try:
-            indexes = [word_to_index[word] for word in T.text_to_word_sequence(row[1],
+            indexes = [getIndex(word, word_to_index) for word in T.text_to_word_sequence(row[1],
                                                filters='!"#$%&()*+,-./:;<=>?@[\]^_`{|}~\t\n',
                                                lower=True,
                                                split=" ")]
@@ -77,7 +86,7 @@ def readTest(word_to_index):
             testSet.append(indexes)
         except:
             errors += 1
-            # testErrors.writerow(row)
+            testErrors.writerow(row)
     print ('there are {} number of error sentences in test set'.format(errors))
     return testSet
 
@@ -136,7 +145,6 @@ def load_data():
 
 
 # word_to_index, index_to_word, word_to_vec_map = read_glove_vecs('./data/glove.6B.50d.txt')
-# # load train and test data into word indexes first
 # f1 = open('./data/trainError.csv', 'w')
 # trainErrors = csv.writer(f1)
 # trainX, trainY = readTrain(word_to_index)
