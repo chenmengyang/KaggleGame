@@ -1,9 +1,9 @@
 # KaggleGame
 
-## Scraper
+## Scraper guide
 
-* If want to run, please install nodejs on your env (version>8)
+* Please install nodejs (version>8)
 
-* execute "npm install" at the root dir
+* execute "npm install" at the root dir, this will install required Node packages
 
 * execute the scripts at command line: node scriptName.js
