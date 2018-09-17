@@ -12,8 +12,8 @@ def cov_to_class(val):
             return i
 
 def salt_dataset():
-    trainX = [resize(img_to_array(load_img(path + 'train/images/{}'.format(filename), grayscale=True))/255, (128,128)) for filename in sorted(os.listdir(path + 'train/images'))]
-    trainY = [resize(img_to_array(load_img(path + 'train/masks/{}'.format(filename), grayscale=True))/255, (128,128)) for filename in sorted(os.listdir(path + 'train/masks'))]
+    trainX = [resize(img_to_array(load_img(path + 'train/images/{}'.format(filename), color_mode = "grayscale"))/255, (128,128)) for filename in sorted(os.listdir(path + 'train/images'))]
+    trainY = [resize(img_to_array(load_img(path + 'train/masks/{}'.format(filename), color_mode = "grayscale"))/255, (128,128)) for filename in sorted(os.listdir(path + 'train/masks'))]
     coverClass = [cov_to_class(np.sum(msk)/(128*128)) for msk in trainY]
     traindf = pd.DataFrame(data={
         'X': trainX,
@@ -31,5 +31,5 @@ def salt_dataset():
     valX = np.array(list(valX))
     valY = np.array(list(valY))
     ts = pd.read_csv(path + 'sample_submission.csv')
-    testX = np.array([resize(img_to_array(load_img(path + 'test/images/{}.png'.format(filename), grayscale=True))/255, (128,128)) for filename in ts['id']])
+    testX = np.array([resize(img_to_array(load_img(path + 'test/images/{}.png'.format(filename), color_mode = "grayscale"))/255, (128,128)) for filename in ts['id']])
     return trainX, trainY, valX, valY, testX
