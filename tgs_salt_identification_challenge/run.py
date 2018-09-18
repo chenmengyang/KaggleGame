@@ -3,6 +3,7 @@ import matplotlib as mpl
 import matplotlib.image as mpimg
 # from PIL import Image
 plt.style.use('seaborn-white')
+plt.switch_backend('agg')
 import seaborn as sns
 sns.set_style("white")
 import numpy as np
@@ -50,8 +51,8 @@ try:
     plt.savefig('./data/figures/train_loss.png')
     dlossdf.plot.line()
     plt.savefig('./data/figures/train_dice_loss.png')
-except:
-    pass
+except Exception as e:
+    print ('save training images error')
 
 # 5 find the best_threshold
 testY1 = predict(unet_model, valX, valY)
@@ -80,5 +81,5 @@ try:
         axs[index, 1].set_title('gt-input', fontsize=15)
     plt.subplots_adjust(hspace=.5)
     plt.savefig('./data/figures/final_review.png')
-except:
-    pass
+except Exception as e:
+    print ('saving sample review image error')
