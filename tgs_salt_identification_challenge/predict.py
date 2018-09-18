@@ -1,14 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
+plt.switch_backend('agg')
 from metrices import my_iou_metric1
 from skimage.transform import resize
 
-def predict(model, datasetX, datasetY):
+def predict_result(model, x_test): # predict both orginal and reflect x
+    preds_test = model.predict(x_test).reshape(-1, 128, 128)
+    preds_test += np.array([ np.fliplr(a) for a in model.predict(np.array([np.fliplr(x) for x in x_test])).reshape(-1, 128, 128)])
+    return preds_test / 2.0
+
+def predict(model, datasetX, datasetY, trueX):
     model.load_weights("./data/keras.model")
-    def predict_result(model, x_test): # predict both orginal and reflect x
-        preds_test = model.predict(x_test).reshape(-1, 128, 128)
-        preds_test += np.array([ np.fliplr(a) for a in model.predict(np.array([np.fliplr(x) for x in x_test])).reshape(-1, 128, 128)])
-        return preds_test / 2.0
     valP = predict_result(model, datasetX)
     datasetY = datasetY.reshape(-1, 128, 128)
     ths = np.arange(0.4, 1, 0.05)
@@ -25,7 +27,7 @@ def predict(model, datasetX, datasetY):
         plt.legend()
         plt.savefig('./data/figures/val_threshold_bst.png')
     except:
-        pass
-    testY1 = [resize(timg, (101, 101)) for timg in model.predict(datasetX).reshape(-1, 128, 128)]
+        print ('save image val_threshold_bst error')
+    testY1 = [resize(timg, (101, 101)) for timg in model.predict(trueX).reshape(-1, 128, 128)]
     testY1 = np.array([1*(im > threshold_best) for im in testY1])
     return testY1

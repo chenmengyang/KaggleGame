@@ -55,7 +55,7 @@ except Exception as e:
     print ('save training images error')
 
 # 5 find the best_threshold
-testY1 = predict(unet_model, valX, valY)
+testY1 = predict(unet_model, valX, valY, testX)
 
 # 6 submit result
 sub = pd.read_csv('./data/sample_submission.csv')
