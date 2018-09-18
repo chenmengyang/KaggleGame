@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-plt.switch_backend('agg')
 from metrices import my_iou_metric1
 from skimage.transform import resize
 
@@ -28,6 +27,6 @@ def predict(model, datasetX, datasetY, trueX):
         plt.savefig('./data/figures/val_threshold_bst.png')
     except:
         print ('save image val_threshold_bst error')
-    testY1 = [resize(timg, (101, 101)) for timg in model.predict(trueX).reshape(-1, 128, 128)]
+    testY1 = [resize(timg, (101, 101), mode='constant', preserve_range=True) for timg in model.predict(trueX).reshape(-1, 128, 128)]
     testY1 = np.array([1*(im > threshold_best) for im in testY1])
     return testY1

@@ -15,7 +15,6 @@ from models.unet import Model
 from train import train
 from predict import predict
 from metrices import my_iou_metric1
-from skimage.transform import resize
 from datetime import datetime
 import random
 
