@@ -31,33 +31,10 @@ print ('finish step 2')
 his, unet_model = train(unet_model, 200, 32, trainX, trainY, valX, valY)
 print ('finish step 3')
 
-# 4 visualise training history
-ioudf = pd.DataFrame(data={
-    'iou': his.history['my_iou_metric'],
-    'val_iou': his.history['val_my_iou_metric'],
-})
-lossdf = pd.DataFrame(data={
-    'loss': his.history['loss'],
-    'val_loss': his.history['val_loss'],
-})
-dlossdf = pd.DataFrame(data={
-    'dice_loss': his.history['dice_loss'],
-    'val_dice_loss': his.history['val_dice_loss'],
-})
-try:
-    ioudf.plot.line()
-    plt.savefig('./data/figures/train_iou.png')
-    lossdf.plot.line()
-    plt.savefig('./data/figures/train_loss.png')
-    dlossdf.plot.line()
-    plt.savefig('./data/figures/train_dice_loss.png')
-except Exception as e:
-    print ('save training images error')
-
-# 5 find the best_threshold
+# 4 find the best_threshold on val set and do the predict on test set
 testY1 = predict(unet_model, valX, valY, testX)
 
-# 6 submit result
+# 5 submit result
 sub = pd.read_csv('./data/sample_submission.csv')
 def rle_encode(im):
     pixels = im.flatten(order = 'F')
@@ -69,6 +46,7 @@ def rle_encode(im):
 sub['rle_mask'] = [rle_encode(imx) for imx in testY1]
 sub.to_csv('./data/outputs/sub_{}.csv'.format(str(datetime.today())), index=False)
 
+# visualise traning result randomly
 try:
     n = testY1.shape[0]
     m = 10
