@@ -20,7 +20,7 @@ def encoder_block(input_tensor, num_filters, do):
   return encoder_pool, encoder
 
 def decoder_block(input_tensor, concat_tensor, num_filters, padding, do):
-  decoder = layers.Conv2DTranspose(num_filters, (3, 3), strides=(2, 2), padding=padding)(input_tensor)
+  decoder = layers.Conv2DTranspose(num_filters, (2, 2), strides=(2, 2), padding=padding)(input_tensor)
   decoder = layers.concatenate([concat_tensor, decoder], axis=-1)
   decoder = layers.Conv2D(num_filters, (3, 3), padding='same')(decoder)
   decoder = layers.BatchNormalization()(decoder)
