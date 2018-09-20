@@ -4,30 +4,47 @@ from tensorflow.python.keras import models
 from tensorflow.python.keras import optimizers
 from tensorflow.python.keras import losses
 
-class ResidualBlock(tf.keras.Model):
-  def __init__(self, filters):
-    super(ResidualBlock, self).__init__(name='')
-    self.conv1 = layers.Conv2D(filters, (3, 3), padding='same')
-    self.bn1 = layers.BatchNormalization()
-    self.act1 = layers.Activation('relu')
-    self.conv2 = layers.Conv2D(filters, (3, 3), padding='same')
-    self.bn2 = layers.BatchNormalization()
-    self.act2 = layers.Activation('relu')
-    self.conv3 = layers.Conv2D(filters, (3, 3), padding='same')
-    self.bn3 = layers.BatchNormalization()
+def res_seq(num_filters):
+  return tf.keras.Sequential([
+    layers.Conv2D(num_filters, (1, 1)),
+    layers.BatchNormalization(),
+    layers.Activation('relu'),
+    layers.Conv2D(num_filters, (3, 3), padding='same'),
+    layers.BatchNormalization(),
+    layers.Activation('relu'),
+    layers.Conv2D(num_filters, (1, 1)),
+    layers.BatchNormalization()
+  ])
+
+def ResidualBlock(input, num_filters):
+  x = res_seq(num_filters)(input)
+  x = layers.Add()([x, input])
+  return layers.Activation('relu')(x)
+
+# class ResidualBlock(tf.keras.Model):
+#   def __init__(self, filters):
+#     super(ResidualBlock, self).__init__(name='')
+#     self.conv1 = layers.Conv2D(filters, (3, 3), padding='same')
+#     self.bn1 = layers.BatchNormalization()
+#     self.act1 = layers.Activation('relu')
+#     self.conv2 = layers.Conv2D(filters, (3, 3), padding='same')
+#     self.bn2 = layers.BatchNormalization()
+#     self.act2 = layers.Activation('relu')
+#     self.conv3 = layers.Conv2D(filters, (3, 3), padding='same')
+#     self.bn3 = layers.BatchNormalization()
   
-  def call(self, input):
-    x = self.conv1(input)
-    x = self.bn1(x)
-    x = self.act1(x)
-    x = self.conv2(input)
-    x = self.bn2(x)
-    x = self.act2(x)
-    x = self.conv3(x)
-    x = self.bn3(x)
-    x = layers.Add()([x, input])
-    x = layers.Activation('relu')(x)
-    return x
+#   def call(self, input, training=False):
+#     x = self.conv1(input)
+#     x = self.bn1(x, training=training)
+#     x = self.act1(x)
+#     x = self.conv2(input)
+#     x = self.bn2(x, training=training)
+#     x = self.act2(x)
+#     x = self.conv3(x)
+#     x = self.bn3(x, training=training)
+#     x = layers.Add()([x, input])
+#     x = layers.Activation('relu')(x)
+#     return x
 
 def conv_block(input_tensor, num_filters, do=0):
   encoder = layers.Conv2D(num_filters, (3, 3), padding='same')(input_tensor)
@@ -43,7 +60,7 @@ def conv_block(input_tensor, num_filters, do=0):
 def encoder_block(input_tensor, num_filters, do ,res=False):
   if res:
     encoder = layers.Conv2D(num_filters, (3, 3), padding='same')(input_tensor)
-    encoder = ResidualBlock(num_filters)(encoder)
+    encoder = ResidualBlock(encoder, num_filters)
   else:
     encoder = conv_block(input_tensor, num_filters, do)
   encoder_pool = layers.MaxPooling2D((2, 2), strides=(2, 2))(encoder)
