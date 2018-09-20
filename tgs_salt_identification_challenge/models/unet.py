@@ -17,7 +17,15 @@ def res_seq(num_filters):
   ])
 
 def ResidualBlock(input, num_filters):
-  x = res_seq(num_filters)(input)
+  # x = res_seq(num_filters)(input)
+  x = layers.Conv2D(num_filters, (1, 1))(input)
+  x = layers.BatchNormalization()(x)
+  x = layers.Activation('relu')(x)
+  x = layers.Conv2D(num_filters, (3, 3), padding='same')(x)
+  x = layers.BatchNormalization()(x)
+  x = layers.Activation('relu')(x)
+  x = layers.Conv2D(num_filters, (1, 1))(x)
+  x = layers.BatchNormalization()(x)
   x = layers.Add()([x, input])
   return layers.Activation('relu')(x)
 
