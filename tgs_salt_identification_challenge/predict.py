@@ -22,6 +22,9 @@ def predict(model, datasetX, datasetY, trueX):
     log = logging.getLogger(__name__)
     log.addHandler(logging.NullHandler())
     try:
+        # debug
+        plt.show()
+        # end debug
         plt.plot(ths, ious)
         plt.plot(threshold_best, iou_best, "xr", label="Best threshold")
         plt.xlabel("Threshold")
